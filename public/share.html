@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>LocalShare – Paylaş</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="alert.js"></script>
+  <!-- JSZip’i public/js/jszip.min.js olarak projeye dahil ettiğini varsayıyoruz -->
+  <script src="js/jszip.min.js"></script>
+  <style>
+    /* Toggle stili */
+    .mode-toggle { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .mode-toggle label { cursor: pointer; }
+    .selected-list { margin: 1rem 0; list-style: none; padding: 0; }
+    .selected-list li { padding: .5rem; background: #272727; border-radius: 4px; margin-bottom: .5rem; font-size: .9rem; }
+  </style>
+</head>
+<body>
+    <nav class="container flex justify-between items-center">
+        <div class="brand">Local File Share</div>
+        <ul class="flex">
+          <li><a href="index.html">Ana Sayfa</a></li>
+          <li><a href="share.html">Paylaş</a></li>
+        </ul>
+      </nav>
+    
+      <main class="container">
+        <section>
+          <h2>Paylaşmak İçin Seç</h2>
+          <div class="mode-toggle">
+            <label><input type="radio" name="mode" value="file" checked><span>Dosya</span></label>
+            <label><input type="radio" name="mode" value="folder"><span>Klasör</span></label>
+          </div>
+    
+          <input id="fileInput" type="file" multiple>
+          <ul id="selectedList" class="selected-list"></ul>
+    
+          <div class="flex gap-2">
+            <button id="shareBtn" class="btn btn-primary" disabled>Paylaş</button>
+            <button id="cancelBtn" class="btn btn-secondary" style="display:none;">İptal</button>
+          </div>
+    
+          <div id="progress" class="progress-wrapper" style="display:none;">
+            <div class="progress-bar"><div></div></div>
+          </div>
+        </section>
+    
+        <section>
+          <h2>Paylaşılan Dosyalar</h2>
+          <button id="refreshBtn" class="btn btn-secondary">Yenile</button>
+          <ul id="fileList" class="file-list"></ul>
+        </section>
+      </main>
+    
+      <footer>
+        © 2025 LocalShare • Aynı Wi‑Fi’da herkes kullanabilir.
+      </footer>
+
+  <script>
+    const modeInputs  = document.querySelectorAll('input[name="mode"]');
+    const fileInput   = document.getElementById('fileInput');
+    const selectedList= document.getElementById('selectedList');
+    const shareBtn    = document.getElementById('shareBtn');
+    const cancelBtn   = document.getElementById('cancelBtn');
+    const refreshBtn  = document.getElementById('refreshBtn');
+    const fileList    = document.getElementById('fileList');
+    const progress    = document.getElementById('progress');
+    const progressBar = progress.querySelector('.progress-bar > div');
+
+    // Mode toggle: Dosya veya Klasör seçimine göre attribute güncelle
+    modeInputs.forEach(inp => inp.addEventListener('change', () => {
+      if (inp.checked) {
+        if (inp.value === 'folder') {
+          fileInput.setAttribute('webkitdirectory', '');
+          fileInput.setAttribute('directory', '');
+        } else {
+          fileInput.removeAttribute('webkitdirectory');
+          fileInput.removeAttribute('directory');
+        }
+        // Yeni moda geçince seçimleri sıfırla
+        resetSelection();
+      }
+    }));
+
+    // Seçim yapıldığında listele ve butonları göster
+    fileInput.addEventListener('change', () => {
+      selectedList.innerHTML = '';
+      const files = [...fileInput.files];
+      if (!files.length) {
+        shareBtn.disabled = true;
+        cancelBtn.style.display = 'none';
+        return;
+      }
+      // Listele
+      files.forEach(f => {
+        const li = document.createElement('li');
+        const rel = f.webkitRelativePath || f.name;
+        li.textContent = rel;
+        selectedList.appendChild(li);
+      });
+      shareBtn.disabled = false;
+      cancelBtn.style.display = 'inline-block';
+    });
+
+    // İptal: seçimi sıfırla
+    cancelBtn.addEventListener('click', () => {
+      resetSelection();
+    });
+
+    function resetSelection() {
+      fileInput.value = '';
+      selectedList.innerHTML = '';
+      shareBtn.disabled = true;
+      cancelBtn.style.display = 'none';
+    }
+
+    // Paylaş
+    shareBtn.addEventListener('click', async () => {
+      const files = [...fileInput.files];
+      if (!files.length) return;
+
+      shareBtn.disabled = true;
+      cancelBtn.disabled = true;
+      // ZIP mi?
+      const isFolder   = files.some(f => f.webkitRelativePath && f.webkitRelativePath.includes('/'));
+      const isMultiple = !isFolder && files.length > 1;
+      const form = new FormData();
+      let uploadName;
+
+      if (isFolder || isMultiple) {
+        const zip = new JSZip();
+        files.forEach(f => zip.file(f.webkitRelativePath || f.name, f));
+        showProgress();
+        const blob = await zip.generateAsync({ type: 'blob' }, meta => updateProgress(meta.percent));
+        const base = isFolder
+          ? files[0].webkitRelativePath.split('/')[0]
+          : 'files';
+        uploadName = `${base}.zip`;
+        form.append('file', blob, uploadName);
+      } else {
+        const f = files[0];
+        uploadName = f.name;
+        form.append('file', f, f.name);
+      }
+
+      upload(form);
+    });
+
+    function showProgress() {
+      progress.style.display = 'block';
+      updateProgress(0);
+    }
+    function hideProgress() {
+      progress.style.display = 'none';
+    }
+    function updateProgress(p) {
+      progressBar.style.width = p + '%';
+    }
+
+    function upload(form) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/upload');
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) updateProgress(Math.floor(e.loaded / e.total * 100));
+      };
+      xhr.onload = () => {
+        hideProgress();
+        shareBtn.disabled = false;
+        cancelBtn.disabled = false;
+        if (xhr.status === 200) {
+          const { filename } = JSON.parse(xhr.responseText);
+          showAlert('Başarılı', `"${filename}" paylaşıldı.`, 'success');
+          resetSelection();
+          loadFiles();
+        } else {
+          let err = 'Sunucu hatası';
+          try { err = JSON.parse(xhr.responseText).error; } catch {}
+          showAlert('Hata', err, 'error');
+        }
+      };
+      xhr.onerror = () => {
+        hideProgress();
+        shareBtn.disabled = false;
+        cancelBtn.disabled = false;
+        showAlert('Hata', 'Yükleme sırasında hata oluştu.', 'error');
+      };
+      xhr.send(form);
+    }
+
+    // Listeyi yükle
+    refreshBtn.addEventListener('click', loadFiles);
+    async function loadFiles() {
+      fileList.innerHTML = '';
+      const res = await fetch('/files');
+      const arr = await res.json();
+      if (!arr.length) {
+        fileList.innerHTML = '<li style="color:#777">Henüz dosya yok.</li>';
+      } else {
+        arr.forEach(name => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span>${name}</span>
+            <div>
+              <a href="/download/${encodeURIComponent(name)}" class="btn-modal btn" style="margin-right:.5rem;">İndir</a>
+              <button class="btn-danger btn-delete btn" data-name="${name}">Sil</button>
+            </div>`;
+          fileList.appendChild(li);
+        });
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.onclick = async () => {
+            const nm = btn.dataset.name;
+            const ok = await showConfirm('Onay', `“${nm}” silinsin mi?`);
+            if (!ok) return;
+            const d = await fetch(`/files/${nm}`, { method: 'DELETE' });
+            if (d.ok) {
+              showAlert('Silindi', `"${nm}" silindi.`, 'success');
+              loadFiles();
+            } else {
+              let er = 'Sunucu hatası';
+              try { er = (await d.json()).error; } catch {}
+              showAlert('Hata', er, 'error');
+            }
+          };
+        });
+      }
+    }
+
+    // Sayfa yüklendiğinde
+    loadFiles();
+  </script>
+</body>
+</html>
