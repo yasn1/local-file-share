@@ -16,6 +16,10 @@ npm install
 ```
 
 ```cmd
+cd local-file-share
+```
+
+```cmd
 npm start
 ```
 <br>
