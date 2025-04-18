@@ -12,11 +12,11 @@ git clone https://github.com/yasn1/local-file-share.git
 ```
 
 ```cmd
-npm install
+cd local-file-share
 ```
 
 ```cmd
-cd local-file-share
+npm install
 ```
 
 ```cmd
