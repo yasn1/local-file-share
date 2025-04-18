@@ -4,6 +4,21 @@ Bu proje tamamen gpt tarafınadn yazıldı (%75)
 # Hakkında
 Projenin amacı aynı ağa bağlı cihazların sunucuyu başlatanın cihazını kullanarak dosya alışverişi sağlamasını kolaylaştırmak.
 
+<br>
+
+## Kurulum
+```cmd
+git clone https://github.com/yasn1/local-file-share.git
+```
+
+```cmd
+npm install
+```
+
+```cmd
+npm start
+```
+<br>
 
 ## Önemli
 **Windows Kullananlar için:** 
