@@ -16,7 +16,7 @@ Denetim masası > Sistem Ve Güvenlik > Defender Güvenlik Duvarı > Solda geli�
 
 <br><br><br>
 
-**Linux kullannalar için**:
+**Linux kullananlar için**:
 ```cmd
 sudo iptables -A INPUT -p tcp --dport 8008 -j ACCEPT
 ```
