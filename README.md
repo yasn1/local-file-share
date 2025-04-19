@@ -20,7 +20,7 @@ npm install
 ```
 
 ```cmd
-npm start
+npm run start
 ```
 <br>
 
