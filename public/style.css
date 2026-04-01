@@ -12,7 +12,6 @@
   --gap: 1rem;
 }
 
-/* Reset & base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -34,7 +33,6 @@ a {
   color: inherit;
 }
 
-/* Container */
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -48,7 +46,6 @@ main {
   min-height: 1000px;
 }
 
-/* Navbar */
 nav {
   background: var(--card-bg);
   padding: .75rem 1rem;
@@ -90,7 +87,6 @@ nav li a:hover {
   color: #fff;
 }
 
-/* Hero (index page) */
 .hero {
   border-radius: var(--radius);
   padding: 4rem 1rem;
@@ -146,7 +142,6 @@ nav li a:hover {
   transform: translateY(-2px);
 }
 
-/* Sections & cards */
 section {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -156,7 +151,6 @@ section {
   backdrop-filter: blur(8px);
 }
 
-/* Mode toggle */
 .mode-toggle {
   display: flex;
   gap: var(--gap);
@@ -179,7 +173,6 @@ button {
   color: var(--text);
 }
 
-/* File list */
 .selected-list,
 .file-list {
   list-style: none;
@@ -198,7 +191,6 @@ button {
   align-items: center;
 }
 
-/* Progress */
 .progress-wrapper {
   margin-top: var(--gap);
 }
@@ -218,7 +210,6 @@ button {
   transition: width .2s;
 }
 
-/* Footer */
 footer {
   text-align: center;
   padding: 1rem 0;
@@ -231,7 +222,6 @@ footer {
   transform: translateX(-50%);
 }
 
-/* ——— Modal Overlay & Box ——— */
 .modal-overlay {
   position: fixed;
   inset: 0;

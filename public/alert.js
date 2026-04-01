@@ -1,6 +1,3 @@
-// public/alert.js
-
-// Basit alert
 function showAlert(title, text, type = 'info') {
     const colors = {
       info:  '#3150ff',
@@ -29,7 +26,6 @@ function showAlert(title, text, type = 'info') {
     };
   }
   
-  // Basit confirm
   function showConfirm(title, text) {
     return new Promise(resolve => {
       const overlay = document.createElement('div');

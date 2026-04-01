@@ -1,7 +1,6 @@
 const helmet = require('helmet');
 
 module.exports = helmet({
-  contentSecurityPolicy: false,  // gerekirse ayarla
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
-  // ... diğer helmet ayarları
 });
