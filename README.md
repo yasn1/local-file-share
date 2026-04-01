@@ -1,25 +1,25 @@
-# 📁 Local File Share
+# Local File Share
 
 Local File Share, aynı yerel ağa (Wi-Fi veya LAN) bağlı cihazlar arasında hızlı, kolay ve güvenli bir şekilde dosya transferi yapmanızı sağlayan Node.js tabanlı pratik bir web uygulamasıdır.
 
 Bu proje, bulut servislerine veya harici disklere/USB belleklere ihtiyaç duymadan cihazlarınız arasında doğrudan, tarayıcı üzerinden dosya paylaşımı yapmak için tasarlanmıştır.
 
-## ✨ Özellikler
+## Özellikler
 
-- **🛜 Yerel Ağ Üzerinden Hızlı Transfer:** İnternet kotanızı harcamadan, modeminizin veya router'ınızın desteklediği maksimum yerel ağ hızında dosya aktarımı.
-- **🔒 Güvenli Altyapı:** `helmet`, `cors` ve `express-rate-limit` gibi kütüphanelerle temel güvenlik önlemleri alınmıştır.
-- **📦 Çoklu Dosya Desteği:** `multer` ve `archiver` entegrasyonu sayesinde dosyaları veya klasörleri kolayca yükleyip indirebilirsiniz.
-- **⚡ Veri Sıkıştırma:** Transferleri hızlandırmak ve sayfa yüklemelerini optimize etmek için `compression` altyapısı kullanılmıştır.
-- **💻 Çapraz Platform Çalışabilme:** Modern bir tarayıcıya sahip herhangi bir cihazdan (Telefon, Tablet, Bilgisayar, Akıllı TV) kolayca erişilebilir ve kullanılabilir. Uygulama indirmeye gerek yoktur.
+- **Yerel Ağ Üzerinden Hızlı Transfer:** İnternet kotanızı harcamadan, modeminizin veya router'ınızın desteklediği maksimum yerel ağ hızında dosya aktarımı.
+- **Güvenli Altyapı:** `helmet`, `cors` ve `express-rate-limit` gibi kütüphanelerle temel güvenlik önlemleri alınmıştır.
+- **Çoklu Dosya Desteği:** `multer` ve `archiver` entegrasyonu sayesinde dosyaları veya klasörleri kolayca yükleyip indirebilirsiniz.
+- **Veri Sıkıştırma:** Transferleri hızlandırmak ve sayfa yüklemelerini optimize etmek için `compression` altyapısı kullanılmıştır.
+- **Çapraz Platform Çalışabilme:** Modern bir tarayıcıya sahip herhangi bir cihazdan (Telefon, Tablet, Bilgisayar, Akıllı TV) kolayca erişilebilir ve kullanılabilir. Uygulama indirmeye gerek yoktur.
 
-## 🚀 Kurulum ve Çalıştırma
+## Kurulum ve Çalıştırma
 
 Projeyi kendi ortamınızda çalıştırmak için aşağıdaki adımları takip edebilirsiniz.
 
-### 1️⃣ Gereksinimler
+### Gereksinimler
 - Sisteminizde **Node.js** (v14 veya üzeri) yüklü olmalıdır.
 
-### 2️⃣ Kurulum
+### Kurulum
 Projeyi bilgisayarınıza klonlayın ve gereksinimleri yükleyin:
 
 ```bash
@@ -28,7 +28,7 @@ cd local-file-share
 npm install
 ```
 
-### 3️⃣ Başlatma
+### Başlatma
 Sunucuyu başlatmak için komut satırında:
 
 ```bash
@@ -40,11 +40,11 @@ Sunucu başarılı bir şekilde başladığında, terminalde uygulamanın hangi 
 
 ---
 
-## ⚙️ Ağ ve Güvenlik Duvarı Ayarları (ÖNEMLİ)
+## Ağ ve Güvenlik Duvarı Ayarları (ÖNEMLİ)
 
 Ağdaki diğer cihazların bilgisayarınızda çalışan bu sunucuya erişebilmesi için `8008` (veya `.env` dosyasından ayarladığınız) TCP portuna işletim sisteminizin güvenlik duvarından izin vermeniz gerekmektedir.
 
-### 🪟 Windows Kullanıcıları İçin
+### Windows Kullanıcıları İçin
 Windows Defender Güvenlik Duvarı üzerinden yeni bir "Gelen Kuralı" eklemelisiniz:
 
 1. **Denetim Masası > Sistem ve Güvenlik > Windows Defender Güvenlik Duvarı**'nı açın.
@@ -57,7 +57,7 @@ Windows Defender Güvenlik Duvarı üzerinden yeni bir "Gelen Kuralı" eklemelis
 8. Kuralların uygulanacağı profilleri (Özel, Ortak, Etki Alanı) kendi ağ güvenliğinize göre seçin.
 9. Kurala "Local File Share Port 8008" gibi bir isim verip işlemi tamamlayın.
 
-### 🐧 Linux Kullanıcıları İçin
+### Linux Kullanıcıları İçin
 Terminal üzerinden `iptables` komutuyla ilgili portu erişime açabilirsiniz:
 
 ```bash
@@ -67,10 +67,10 @@ sudo iptables -A INPUT -p tcp --dport 8008 -j ACCEPT
 
 ---
 
-## ⚠️ Uyarılar ve Sorumluluk Reddi
+## Uyarılar ve Sorumluluk Reddi
 
 - **Güvenlik Riski:** Bu web uygulaması, sunucu tarafında herhangi bir antivirüs veya zararlı yazılım filtreleme (malware scanning) mekanizması barındırmaz. Ağınıza bağlı kullanıcıların sunucuya yüklediği veya ağdan indirilen dosyalardaki potansiyel zararlı yazırımlardan tamamen **kullanıcıların kendisi sorumludur**. Kullanırken dikkatli olunuz.
 - Sisteminizi sadece **güvendiğiniz kişilerin** bulunduğu korumalı yerel ağlarda (örneğin ev veya kapalı ofis ağınızda) kullanmanız şiddetle tavsiye edilir. Ortak/halka açık Wi-Fi ağlarında (Kafeler, havalimanları vb.) çalıştırmanız risk oluşturabilir.
 
-## 📄 Lisans
+## Lisans
 Bu proje geliştirilmeye açıktır. İhtiyaçlarınıza göre kod üzerinde değişiklik yapabilir ve kendi ağ mimarinize entegre edebilirsiniz.
