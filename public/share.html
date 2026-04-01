@@ -1,232 +1,1118 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LocalShare – Paylaş</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="alert.js"></script>
-  <!-- JSZip’i public/js/jszip.min.js olarak projeye dahil ettiğini varsayıyoruz -->
-  <script src="js/jszip.min.js"></script>
+  <script src="/js/fflate.min.js"></script>
   <style>
-    /* Toggle stili */
-    .mode-toggle { display: flex; gap: 1rem; margin-bottom: 1rem; }
-    .mode-toggle label { cursor: pointer; }
-    .selected-list { margin: 1rem 0; list-style: none; padding: 0; }
-    .selected-list li { padding: .5rem; background: #272727; border-radius: 4px; margin-bottom: .5rem; font-size: .9rem; }
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1f1f1f;
+      --border: #2a2a2a;
+      --accent: #00ff88;
+      --accent-dim: rgba(0, 255, 136, .12);
+      --accent-dim2: rgba(0, 255, 136, .06);
+      --text: #e8e8e8;
+      --muted: #666;
+      --danger: #ff4455;
+      --danger-dim: rgba(255, 68, 85, .12);
+      --warn: #ffaa00;
+      --radius: 10px;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, .08) 2px,
+          rgba(0, 0, 0, .08) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(13, 13, 13, .92);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .brand {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: .05em;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .brand::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .875rem;
+      transition: color .2s;
+      font-family: var(--mono);
+      font-size: .8rem;
+    }
+
+    nav a:hover {
+      color: var(--accent);
+    }
+
+    main {
+      flex: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: .4;
+    }
+
+    .card-title {
+      font-family: var(--mono);
+      font-size: .75rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .card-title svg {
+      opacity: .7;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .mode-toggle label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .85rem;
+      transition: all .2s;
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .mode-toggle label:has(input:checked) {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .mode-toggle input {
+      display: none;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all .25s;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-dim2);
+    }
+
+    .drop-zone input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 2rem;
+      margin-bottom: .75rem;
+      display: block;
+    }
+
+    .drop-label {
+      color: var(--muted);
+      font-size: .875rem;
+    }
+
+    .drop-label strong {
+      color: var(--text);
+    }
+
+    .compress-option {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+      padding: .75rem 1rem;
+      background: var(--accent-dim2);
+      border: 1px solid rgba(0, 255, 136, .15);
+      border-radius: 6px;
+    }
+
+    .compress-option label {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      cursor: pointer;
+      font-size: .85rem;
+      color: var(--text);
+    }
+
+    .compress-option input[type=checkbox] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+
+    .compress-option input[type=checkbox]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .compress-option input[type=checkbox]:checked::after {
+      content: '✓';
+      display: block;
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 14px;
+    }
+
+    .compress-badge {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: .7rem;
+      padding: .2rem .5rem;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 4px;
+    }
+
+    .selected-list {
+      list-style: none;
+      margin-bottom: 1rem;
+      max-height: 180px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: .375rem;
+    }
+
+    .selected-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .selected-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .selected-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .selected-list li {
+      padding: .5rem .75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .8rem;
+      font-family: var(--mono);
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .selected-list li span.size {
+      float: right;
+      color: var(--accent);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: .75rem;
+    }
+
+    .btn {
+      padding: .6rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: .78rem;
+      letter-spacing: .05em;
+      transition: all .2s;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-danger {
+      background: var(--danger-dim);
+      color: var(--danger);
+      border: 1px solid rgba(255, 68, 85, .25);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 68, 85, .2);
+    }
+
+    .upload-panel {
+      display: none;
+      margin-top: 1.25rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      gap: 1rem;
+      flex-direction: column;
+    }
+
+    .upload-panel.active {
+      display: flex;
+    }
+
+    .upload-phase {
+      font-family: var(--mono);
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .upload-phase .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .upload-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .6rem .75rem;
+    }
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: .62rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .2rem;
+    }
+
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-value.accent {
+      color: var(--accent);
+    }
+
+    .stat-value.warn {
+      color: var(--warn);
+    }
+
+    .prog-track {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #00ccff);
+      border-radius: 4px;
+      transition: width .15s linear;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .prog-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .35rem;
+    }
+
+    .prog-pct {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .file-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .file-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .75rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: border-color .2s;
+    }
+
+    .file-list li:hover {
+      border-color: rgba(0, 255, 136, .2);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-dim);
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .file-icon svg {
+      color: var(--accent);
+    }
+
+    .file-name {
+      font-family: var(--mono);
+      font-size: .8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: .5rem;
+      flex-shrink: 0;
+    }
+
+    #alert-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .alert-box {
+      padding: .8rem 1.25rem;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: .8rem;
+      border-left: 3px solid;
+      min-width: 260px;
+      animation: slideIn .25s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(20px);
+        opacity: 0
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1
+      }
+    }
+
+    .alert-success {
+      background: rgba(0, 255, 136, .1);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .alert-error {
+      background: rgba(255, 68, 85, .1);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      min-width: 320px;
+      position: relative;
+    }
+
+    .modal-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--danger), transparent);
+    }
+
+    .modal-title {
+      font-family: var(--mono);
+      font-size: .7rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--danger);
+      margin-bottom: .75rem;
+    }
+
+    .modal-msg {
+      color: var(--text);
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: .75rem;
+      justify-content: flex-end;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: .85rem;
+      padding: 1rem 0;
+      font-family: var(--mono);
+      font-size: .75rem;
+    }
   </style>
 </head>
+
 <body>
-    <nav class="container flex justify-between items-center">
-        <div class="brand">Local File Share</div>
-        <ul class="flex">
-          <li><a href="index.html">Ana Sayfa</a></li>
-          <li><a href="share.html">Paylaş</a></li>
-        </ul>
-      </nav>
-    
-      <main class="container">
-        <section>
-          <h2>Paylaşmak İçin Seç</h2>
-          <div class="mode-toggle">
-            <label><input type="radio" name="mode" value="file" checked><span>Dosya</span></label>
-            <label><input type="radio" name="mode" value="folder"><span>Klasör</span></label>
+
+  <nav>
+    <div class="brand">LocalShare</div>
+    <ul>
+      <li><a href="index.html">/ ana-sayfa</a></li>
+      <li><a href="share.html">/ paylaş</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <div class="card">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        Dosya Paylaş
+      </div>
+
+      <div class="mode-toggle">
+        <label><input type="radio" name="mode" value="file" checked> 📄 Dosya</label>
+        <label><input type="radio" name="mode" value="folder"> 📁 Klasör</label>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <input id="fileInput" type="file" multiple>
+        <span class="drop-icon">⬆</span>
+        <div class="drop-label"><strong>Tıkla veya sürükle & bırak</strong></div>
+        <div class="drop-label" style="font-size:.78rem;margin-top:.3rem">Dosyaları buraya bırakabilirsin</div>
+      </div>
+
+      <div class="compress-option">
+        <label>
+          <input type="checkbox" id="compressCheck" checked>
+          Sıkıştırarak yükle (ZIP deflate)
+        </label>
+        <span class="compress-badge" id="compressBadge">AÇIK</span>
+      </div>
+
+      <ul id="selectedList" class="selected-list"></ul>
+
+      <div class="btn-row">
+        <button id="shareBtn" class="btn btn-primary" disabled>▶ Paylaş</button>
+        <button id="cancelBtn" class="btn btn-secondary" style="display:none">✕ İptal</button>
+      </div>
+
+      <div class="upload-panel" id="uploadPanel">
+        <div class="upload-phase">
+          <div class="dot"></div><span id="phaseLabel">Hazırlanıyor...</span>
+        </div>
+
+        <div class="upload-stats">
+          <div class="stat-box">
+            <div class="stat-label">Hız</div>
+            <div class="stat-value accent" id="statSpeed">— MB/s</div>
           </div>
-    
-          <input id="fileInput" type="file" multiple>
-          <ul id="selectedList" class="selected-list"></ul>
-    
-          <div class="flex gap-2">
-            <button id="shareBtn" class="btn btn-primary" disabled>Paylaş</button>
-            <button id="cancelBtn" class="btn btn-secondary" style="display:none;">İptal</button>
+          <div class="stat-box">
+            <div class="stat-label">Gönderilen</div>
+            <div class="stat-value" id="statSent">0 B</div>
           </div>
-    
-          <div id="progress" class="progress-wrapper" style="display:none;">
-            <div class="progress-bar"><div></div></div>
+          <div class="stat-box">
+            <div class="stat-label">Toplam</div>
+            <div class="stat-value" id="statTotal">—</div>
           </div>
-        </section>
-    
-        <section>
-          <h2>Paylaşılan Dosyalar</h2>
-          <button id="refreshBtn" class="btn btn-secondary">Yenile</button>
-          <ul id="fileList" class="file-list"></ul>
-        </section>
-      </main>
-    
-      <footer>
-        © 2025 LocalShare • Aynı Wi‑Fi’da herkes kullanabilir.
-      </footer>
+          <div class="stat-box">
+            <div class="stat-label">Kalan süre</div>
+            <div class="stat-value warn" id="statEta">—</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="prog-track">
+            <div class="prog-fill" id="progFill"></div>
+          </div>
+          <div class="prog-label">
+            <span id="progPhaseText">Bekliyor</span>
+            <span class="prog-pct" id="progPct">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+          <polyline points="13 2 13 9 20 9" />
+        </svg>
+        Paylaşılan Dosyalar
+      </div>
+      <div class="btn-row" style="margin-bottom:1rem">
+        <button id="refreshBtn" class="btn btn-secondary">↻ Yenile</button>
+      </div>
+      <ul id="fileList" class="file-list"></ul>
+    </div>
+
+  </main>
+
+  <footer>© 2025 LocalShare &nbsp;·&nbsp; LAN üzerinde çalışır &nbsp;·&nbsp; İnternet bağlantısı gerekmez</footer>
+
+  <div id="alert-container"></div>
 
   <script>
-    const modeInputs  = document.querySelectorAll('input[name="mode"]');
-    const fileInput   = document.getElementById('fileInput');
-    const selectedList= document.getElementById('selectedList');
-    const shareBtn    = document.getElementById('shareBtn');
-    const cancelBtn   = document.getElementById('cancelBtn');
-    const refreshBtn  = document.getElementById('refreshBtn');
-    const fileList    = document.getElementById('fileList');
-    const progress    = document.getElementById('progress');
-    const progressBar = progress.querySelector('.progress-bar > div');
+    function fmtBytes(b) {
+      if (b === 0 || b == null) return '0 B';
+      const u = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.min(Math.floor(Math.log2(b) / 10), 3);
+      return (b / Math.pow(1024, i)).toFixed(i ? 2 : 0) + ' ' + u[i];
+    }
+    function fmtSpeed(bps) {
+      if (!bps) return '— MB/s';
+      if (bps < 1024) return bps.toFixed(0) + ' B/s';
+      if (bps < 1048576) return (bps / 1024).toFixed(1) + ' KB/s';
+      return (bps / 1048576).toFixed(2) + ' MB/s';
+    }
+    function fmtEta(sec) {
+      if (!isFinite(sec) || sec <= 0) return '—';
+      if (sec < 60) return sec.toFixed(0) + 's';
+      if (sec < 3600) return Math.floor(sec / 60) + 'm ' + (sec % 60 | 0) + 's';
+      return Math.floor(sec / 3600) + 's ' + Math.floor((sec % 3600) / 60) + 'd';
+    }
 
-    // Mode toggle: Dosya veya Klasör seçimine göre attribute güncelle
+    function showAlert(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `alert-box alert-${type}`;
+      el.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
+      document.getElementById('alert-container').appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    function showConfirm(msg) {
+      return new Promise(resolve => {
+        const ov = document.createElement('div');
+        ov.className = 'modal-overlay';
+        ov.innerHTML = `
+          <div class="modal-box">
+            <div class="modal-title">⚠ Onay Gerekli</div>
+            <div class="modal-msg">${msg}</div>
+            <div class="modal-actions">
+              <button class="btn btn-secondary" id="mc-no">Vazgeç</button>
+              <button class="btn btn-danger" id="mc-yes">Sil</button>
+            </div>
+          </div>`;
+        document.body.appendChild(ov);
+        ov.querySelector('#mc-yes').onclick = () => { ov.remove(); resolve(true); };
+        ov.querySelector('#mc-no').onclick = () => { ov.remove(); resolve(false); };
+      });
+    }
+
+    const modeInputs = document.querySelectorAll('input[name="mode"]');
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const selectedList = document.getElementById('selectedList');
+    const shareBtn = document.getElementById('shareBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const fileList = document.getElementById('fileList');
+    const compressCheck = document.getElementById('compressCheck');
+    const compressBadge = document.getElementById('compressBadge');
+    const uploadPanel = document.getElementById('uploadPanel');
+    const phaseLabel = document.getElementById('phaseLabel');
+    const progFill = document.getElementById('progFill');
+    const progPct = document.getElementById('progPct');
+    const progPhaseText = document.getElementById('progPhaseText');
+    const statSpeed = document.getElementById('statSpeed');
+    const statSent = document.getElementById('statSent');
+    const statTotal = document.getElementById('statTotal');
+    const statEta = document.getElementById('statEta');
+
+    compressCheck.addEventListener('change', () => {
+      compressBadge.textContent = compressCheck.checked ? 'AÇIK' : 'KAPALI';
+    });
+
     modeInputs.forEach(inp => inp.addEventListener('change', () => {
-      if (inp.checked) {
-        if (inp.value === 'folder') {
-          fileInput.setAttribute('webkitdirectory', '');
-          fileInput.setAttribute('directory', '');
-        } else {
-          fileInput.removeAttribute('webkitdirectory');
-          fileInput.removeAttribute('directory');
-        }
-        // Yeni moda geçince seçimleri sıfırla
-        resetSelection();
+      if (!inp.checked) return;
+      if (inp.value === 'folder') {
+        fileInput.setAttribute('webkitdirectory', '');
+        fileInput.setAttribute('directory', '');
+        fileInput.removeAttribute('multiple');
+      } else {
+        fileInput.removeAttribute('webkitdirectory');
+        fileInput.removeAttribute('directory');
+        fileInput.setAttribute('multiple', '');
       }
+      resetSelection();
     }));
 
-    // Seçim yapıldığında listele ve butonları göster
-    fileInput.addEventListener('change', () => {
-      selectedList.innerHTML = '';
-      const files = [...fileInput.files];
-      if (!files.length) {
-        shareBtn.disabled = true;
-        cancelBtn.style.display = 'none';
-        return;
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        handleFiles([...e.dataTransfer.files]);
       }
-      // Listele
+    });
+
+    fileInput.addEventListener('change', () => {
+      handleFiles([...fileInput.files]);
+    });
+
+    let selectedFiles = [];
+
+    function handleFiles(files) {
+      selectedFiles = files;
+      selectedList.innerHTML = '';
+      if (!files.length) { shareBtn.disabled = true; cancelBtn.style.display = 'none'; return; }
       files.forEach(f => {
         const li = document.createElement('li');
         const rel = f.webkitRelativePath || f.name;
-        li.textContent = rel;
+        li.innerHTML = `${rel} <span class="size">${fmtBytes(f.size)}</span>`;
         selectedList.appendChild(li);
       });
       shareBtn.disabled = false;
       cancelBtn.style.display = 'inline-block';
-    });
+    }
 
-    // İptal: seçimi sıfırla
-    cancelBtn.addEventListener('click', () => {
-      resetSelection();
-    });
-
+    cancelBtn.addEventListener('click', resetSelection);
     function resetSelection() {
       fileInput.value = '';
+      selectedFiles = [];
       selectedList.innerHTML = '';
       shareBtn.disabled = true;
       cancelBtn.style.display = 'none';
+      hideUploadPanel();
     }
 
-    // Paylaş
+    function showUploadPanel(phase) {
+      uploadPanel.classList.add('active');
+      setPhase(phase, 0);
+    }
+    function hideUploadPanel() {
+      uploadPanel.classList.remove('active');
+    }
+    function setPhase(label, pct) {
+      phaseLabel.textContent = label;
+      progPhaseText.textContent = label;
+      setProgress(pct);
+    }
+    function setProgress(pct) {
+      progFill.style.width = pct + '%';
+      progPct.textContent = Math.floor(pct) + '%';
+    }
+
+    let speedInterval = null;
+    function startSpeedTracker(totalBytes) {
+      let lastLoaded = 0;
+      let lastTime = Date.now();
+      statTotal.textContent = fmtBytes(totalBytes);
+      statSent.textContent = '0 B';
+      statSpeed.textContent = '—';
+      statEta.textContent = '—';
+
+      window._uploadProgress = { loaded: 0 };
+
+      speedInterval = setInterval(() => {
+        const now = Date.now();
+        const loaded = window._uploadProgress.loaded;
+        const dt = (now - lastTime) / 1000;
+        const dBytes = loaded - lastLoaded;
+        const speed = dt > 0 ? dBytes / dt : 0;
+        const remaining = totalBytes - loaded;
+        const eta = speed > 0 ? remaining / speed : Infinity;
+
+        statSpeed.textContent = fmtSpeed(speed);
+        statSent.textContent = fmtBytes(loaded);
+        statEta.textContent = fmtEta(eta);
+
+        lastLoaded = loaded;
+        lastTime = now;
+      }, 600);
+    }
+    function stopSpeedTracker() {
+      if (speedInterval) { clearInterval(speedInterval); speedInterval = null; }
+    }
+
     shareBtn.addEventListener('click', async () => {
-      const files = [...fileInput.files];
+      const files = selectedFiles.length ? selectedFiles : [...fileInput.files];
       if (!files.length) return;
 
       shareBtn.disabled = true;
       cancelBtn.disabled = true;
-      // ZIP mi?
-      const isFolder   = files.some(f => f.webkitRelativePath && f.webkitRelativePath.includes('/'));
-      const isMultiple = !isFolder && files.length > 1;
-      const form = new FormData();
-      let uploadName;
 
-      if (isFolder || isMultiple) {
-        const zip = new JSZip();
-        files.forEach(f => zip.file(f.webkitRelativePath || f.name, f));
-        showProgress();
-        const blob = await zip.generateAsync({ type: 'blob' }, meta => updateProgress(meta.percent));
+      const compress = compressCheck.checked;
+      const isFolder = files.some(f => f.webkitRelativePath && f.webkitRelativePath.includes('/'));
+      const isMulti = !isFolder && files.length > 1;
+      const needsZip = isFolder || isMulti || compress;
+
+      const form = new FormData();
+
+      if (needsZip) {
+        showUploadPanel('Sıkıştırılıyor…');
+        showUploadPanel('Sıkıştırılıyor…');
+        let zipBlob;
+
+        try {
+          const fileMap = {};
+          let processed = 0;
+
+          for (const f of files) {
+            const buffer = await f.arrayBuffer();
+            const path = f.webkitRelativePath || f.name;
+            fileMap[path] = new Uint8Array(buffer);
+
+            processed++;
+            setProgress((processed / files.length) * 50);
+          }
+
+          const level = compress ? 6 : 0;
+          const zipped = fflate.zipSync(fileMap, { level });
+
+          zipBlob = new Blob([zipped], { type: 'application/zip' });
+
+        } catch (e) {
+          showAlert('ZIP oluşturulamadı: ' + e.message, 'error');
+          resetUploadUI();
+          return;
+        }
+
         const base = isFolder
           ? files[0].webkitRelativePath.split('/')[0]
-          : 'files';
-        uploadName = `${base}.zip`;
-        form.append('file', blob, uploadName);
+          : (files.length === 1 ? files[0].name : 'files');
+        const uploadName = base.endsWith('.zip') ? base : base + '.zip';
+
+        const origSize = files.reduce((s, f) => s + f.size, 0);
+        const ratio = origSize > 0 ? ((1 - zipBlob.size / origSize) * 100).toFixed(1) : 0;
+        setPhase(`Yükleniyor… (−${ratio}% küçüldü)`, 50);
+        startSpeedTracker(zipBlob.size);
+        statTotal.textContent = fmtBytes(zipBlob.size) + ` (orijinal: ${fmtBytes(origSize)})`;
+
+        form.append('file', zipBlob, uploadName);
       } else {
         const f = files[0];
-        uploadName = f.name;
+        showUploadPanel('Yükleniyor…');
+        startSpeedTracker(f.size);
         form.append('file', f, f.name);
       }
 
-      upload(form);
+      doUpload(form, needsZip ? 50 : 0);
     });
 
-    function showProgress() {
-      progress.style.display = 'block';
-      updateProgress(0);
-    }
-    function hideProgress() {
-      progress.style.display = 'none';
-    }
-    function updateProgress(p) {
-      progressBar.style.width = p + '%';
-    }
-
-    function upload(form) {
+    function doUpload(form, startPct) {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/upload');
+
       xhr.upload.onprogress = e => {
-        if (e.lengthComputable) updateProgress(Math.floor(e.loaded / e.total * 100));
+        if (e.lengthComputable) {
+          window._uploadProgress = { loaded: e.loaded };
+          const uploadPct = (e.loaded / e.total) * 100;
+          const displayPct = startPct + uploadPct * ((100 - startPct) / 100);
+          setProgress(displayPct);
+          statSent.textContent = fmtBytes(e.loaded);
+        }
       };
+
       xhr.onload = () => {
-        hideProgress();
-        shareBtn.disabled = false;
-        cancelBtn.disabled = false;
+        stopSpeedTracker();
+        resetUploadUI();
         if (xhr.status === 200) {
           const { filename } = JSON.parse(xhr.responseText);
-          showAlert('Başarılı', `"${filename}" paylaşıldı.`, 'success');
+          showAlert(`"${filename}" paylaşıldı.`, 'success');
           resetSelection();
           loadFiles();
         } else {
           let err = 'Sunucu hatası';
-          try { err = JSON.parse(xhr.responseText).error; } catch {}
-          showAlert('Hata', err, 'error');
+          try { err = JSON.parse(xhr.responseText).error; } catch { }
+          showAlert(err, 'error');
         }
       };
       xhr.onerror = () => {
-        hideProgress();
-        shareBtn.disabled = false;
-        cancelBtn.disabled = false;
-        showAlert('Hata', 'Yükleme sırasında hata oluştu.', 'error');
+        stopSpeedTracker();
+        resetUploadUI();
+        showAlert('Yükleme sırasında hata oluştu.', 'error');
       };
       xhr.send(form);
     }
 
-    // Listeyi yükle
+    function resetUploadUI() {
+      shareBtn.disabled = false;
+      cancelBtn.disabled = false;
+      stopSpeedTracker();
+      setTimeout(hideUploadPanel, 2000);
+    }
+
     refreshBtn.addEventListener('click', loadFiles);
+
     async function loadFiles() {
       fileList.innerHTML = '';
-      const res = await fetch('/files');
-      const arr = await res.json();
-      if (!arr.length) {
-        fileList.innerHTML = '<li style="color:#777">Henüz dosya yok.</li>';
-      } else {
+      try {
+        const res = await fetch('/files');
+        const arr = await res.json();
+        if (!arr.length) {
+          fileList.innerHTML = '<li class="empty-state">// henüz dosya yok</li>';
+          return;
+        }
         arr.forEach(name => {
           const li = document.createElement('li');
+          const ext = name.split('.').pop().toUpperCase();
           li.innerHTML = `
-            <span>${name}</span>
-            <div>
-              <a href="/download/${encodeURIComponent(name)}" class="btn-modal btn" style="margin-right:.5rem;">İndir</a>
-              <button class="btn-danger btn-delete btn" data-name="${name}">Sil</button>
+            <div class="file-info">
+              <div class="file-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>
+                </svg>
+              </div>
+              <span class="file-name">${name}</span>
+            </div>
+            <div class="file-actions">
+              <a href="/download/${encodeURIComponent(name)}" class="btn btn-secondary" style="font-size:.72rem;padding:.45rem .9rem;text-decoration:none">⬇ İndir</a>
+              <button class="btn btn-danger" style="font-size:.72rem;padding:.45rem .9rem" data-name="${name}">✕</button>
             </div>`;
           fileList.appendChild(li);
         });
-        document.querySelectorAll('.btn-delete').forEach(btn => {
+
+        document.querySelectorAll('.btn-danger[data-name]').forEach(btn => {
           btn.onclick = async () => {
             const nm = btn.dataset.name;
-            const ok = await showConfirm('Onay', `“${nm}” silinsin mi?`);
+            const ok = await showConfirm(`"${nm}" silinsin mi?`);
             if (!ok) return;
-            const d = await fetch(`/files/${nm}`, { method: 'DELETE' });
+            const d = await fetch(`/files/${encodeURIComponent(nm)}`, { method: 'DELETE' });
             if (d.ok) {
-              showAlert('Silindi', `"${nm}" silindi.`, 'success');
+              showAlert(`"${nm}" silindi.`, 'success');
               loadFiles();
             } else {
               let er = 'Sunucu hatası';
-              try { er = (await d.json()).error; } catch {}
-              showAlert('Hata', er, 'error');
+              try { er = (await d.json()).error; } catch { }
+              showAlert(er, 'error');
             }
           };
         });
+      } catch {
+        fileList.innerHTML = '<li class="empty-state">// sunucuya bağlanılamadı</li>';
       }
     }
 
-    // Sayfa yüklendiğinde
     loadFiles();
   </script>
 </body>
+
 </html>

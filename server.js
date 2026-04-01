@@ -41,4 +41,16 @@ function logAccessUrls() {
 logAccessUrls();
 app.listen(PORT, () => {
   console.log(`Server http://localhost:${PORT}`);
+  bonjour.publish({ name: 'LocalShare', type: 'http', port: PORT });
 });
+
+// Clean shutdown for bonjour
+const exitHandler = () => {
+  bonjour.unpublishAll(() => {
+    bonjour.destroy();
+    process.exit();
+  });
+};
+
+process.on('SIGINT', exitHandler);
+process.on('SIGTERM', exitHandler);

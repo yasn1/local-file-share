@@ -2,28 +2,250 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LocalShare</title>
-  <link rel="stylesheet" href="style.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --accent: #00ff88;
+      --accent-dim: rgba(0,255,136,.12);
+      --text: #e8e8e8;
+      --muted: #666;
+      --radius: 10px;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content:'';
+      position:fixed;
+      inset:0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,.08) 2px,
+        rgba(0,0,0,.08) 4px
+      );
+      pointer-events:none;
+      z-index:999;
+    }
+
+    nav {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:1rem 2rem;
+      border-bottom:1px solid var(--border);
+      background: rgba(13,13,13,.9);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+    }
+
+    .brand::before {
+      content:'';
+      width:8px;height:8px;
+      background:var(--accent);
+      border-radius:50%;
+      box-shadow:0 0 8px var(--accent);
+      animation:pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100%{opacity:1}
+      50%{opacity:.3}
+    }
+
+    nav ul {
+      display:flex;
+      gap:1.5rem;
+      list-style:none;
+    }
+
+    nav a {
+      text-decoration:none;
+      color:var(--muted);
+      font-family:var(--mono);
+      font-size:.8rem;
+    }
+
+    nav a:hover {
+      color:var(--accent);
+    }
+
+    main {
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2rem;
+    }
+
+    .hero-card {
+      max-width:720px;
+      width:100%;
+      background: var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:3rem 2rem;
+      text-align:center;
+      position:relative;
+    }
+
+    .hero-card::before {
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:1px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      opacity:.4;
+    }
+
+    .hero-title {
+      font-size:1.8rem;
+      margin-bottom:1rem;
+      font-weight:600;
+    }
+
+    .hero-desc {
+      color:var(--muted);
+      font-size:.95rem;
+      margin-bottom:2rem;
+      line-height:1.6;
+    }
+
+    .btn {
+      display:inline-block;
+      padding:.7rem 1.4rem;
+      border-radius:6px;
+      font-family:var(--mono);
+      font-size:.8rem;
+      font-weight:700;
+      letter-spacing:.05em;
+      text-decoration:none;
+      transition:.2s;
+    }
+
+    .btn-primary {
+      background:var(--accent);
+      color:#000;
+    }
+
+    .btn-primary:hover {
+      filter:brightness(1.2);
+      transform:translateY(-2px);
+    }
+
+    .features {
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+      gap:1rem;
+      margin-top:2rem;
+    }
+
+    .feature {
+      border:1px solid var(--border);
+      padding:1rem;
+      border-radius:8px;
+      background: rgba(255,255,255,0.02);
+      font-size:.8rem;
+      font-family:var(--mono);
+      color:var(--muted);
+    }
+
+    .feature strong {
+      display:block;
+      color:var(--accent);
+      margin-bottom:.3rem;
+    }
+
+    footer {
+      text-align:center;
+      padding:1.2rem;
+      font-family:var(--mono);
+      font-size:.7rem;
+      color:var(--muted);
+      border-top:1px solid var(--border);
+    }
+  </style>
 </head>
 <body>
-  <nav class="container flex justify-between items-center">
-    <div class="brand">Local File Share</div>
-    <ul class="flex">
-      <li><a href="index.html">Ana Sayfa</a></li>
-      <li><a href="share.html">Paylaş</a></li>
+
+  <nav>
+    <div class="brand">LocalShare</div>
+    <ul>
+      <li><a href="index.html">/ ana-sayfa</a></li>
+      <li><a href="share.html">/ paylaş</a></li>
     </ul>
   </nav>
 
-  <main class="container">
-    <div class="hero">
-      <h1>LAN Üzerinden Hızlı Dosya Paylaşımı</h1>
-      <p>İnternet bağlantısına gerek kalmadan, sadece Wi‑Fi üzerinden dosyalarınızı paylaşın ve indirin.</p>
-      <a href="share.html" class="btn btn-primary">Dosya Paylaş</a>
+  <main>
+    <div class="hero-card">
+
+      <div class="hero-title">
+        LAN Üzerinden Hızlı Dosya Paylaşımı
+      </div>
+
+      <div class="hero-desc">
+        İnternet bağlantısına ihtiyaç duymadan, aynı ağ üzerindeki cihazlar arasında
+        yüksek hızda dosya transferi yapın. Tamamen lokal, hızlı ve güvenli.
+      </div>
+
+      <a href="share.html" class="btn btn-primary">
+        ▶ Paylaşmaya Başla
+      </a>
+
+      <div class="features">
+        <div class="feature">
+          <strong>OFFLINE</strong>
+          İnternet gerekmez
+        </div>
+        <div class="feature">
+          <strong>HIZLI</strong>
+          LAN hızında transfer
+        </div>
+        <div class="feature">
+          <strong>ZIP DESTEK</strong>
+          Otomatik sıkıştırma
+        </div>
+        <div class="feature">
+          <strong>BASİT</strong>
+          Kurulum yok
+        </div>
+      </div>
+
     </div>
   </main>
 
   <footer>
-    © 2025 LocalShare • <a href="https://github.com/your-repo" style="color:var(--accent)">GitHub Repo</a>
+    © 2025 LocalShare · LAN üzerinde çalışır · İnternet gerekmez · <a style="color: var(--accent); text-decoration:none;" target="_blank" href="https://github.com/yasn1/local-file-share"><svg aria-hidden="true" class="octicon octicon-mark-github" style="fill: #ffffff;" height="16" version="1.1" viewBox="0 0 16 16" width="16">
+    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+</svg> GitHub</a>
   </footer>
+
 </body>
 </html>
